@@ -26,9 +26,9 @@ import requests
 import datetime
 from bs4 import BeautifulSoup
 import scraperwiki
-index = 0
 
 def main():
+    index = 0
     dates = builddates()
     for date in dates:
         page = getpage(date)
