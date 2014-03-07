@@ -24,13 +24,18 @@
 
 import requests
 import datetime
+from bs4 import BeautifulSoup
+import scraperwiki
+index = 0
 
 def main():
     dates = builddates()
     for date in dates:
         page = getpage(date)
-        savepage(page, date)
-
+        progtitles = getProgTitles(page)
+        for prog in progtitles:
+            index += 1
+            scraperwiki.sqlite.save(unique_keys=['index'], data={"index": index, "year": str(date.year), "month": str(date.month), "day": str(date.day), "title":prog})
 
 def builddates():
     today = datetime.date.today()
@@ -50,6 +55,17 @@ def getpage(date):
     else:
         page = "Request error"
     return page
+
+def getProgTitles(page):
+    soup = BeautifulSoup(page)
+    progdata = soup.find_all("a", class_="promo-link")
+    progs = []
+    for prog in progdata:
+        progsoup = BeautifulSoup(prog)
+        progtitles = progsoup.find_all("p", class_="title")
+        progtitle = progtitles[0]
+        progs.append(progtitle)
+    return progs
 
 def savepage(page, date):
     filename = str(date.year)+'-'+str(date.month)+'-'+str(date.day)+'.html'
