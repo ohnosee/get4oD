@@ -79,8 +79,8 @@ def getProgTitles(page):
     progs = []
     for prog in progdata:
         progsoup = BeautifulSoup(prog.contents[0])
-        progtitles = progsoup.find_all("p", class_="title")
-        progtitle = unicode(progtitles[0].string)
+        progtitle = progsoup.find("p", class_="title")
+        progtitle = unicode(progtitle.string)
         progs.append(progtitle)
     return progs
 
