@@ -32,10 +32,10 @@ def main():
     dates = builddates()
     for date in dates:
         page = getpage(date)
-        progtitles = getProgTitles(page)
+        progtitles = getURLS(page)
         for prog in progtitles:
             index += 1
-            scraperwiki.sqlite.save(unique_keys=['index'], data={"index": index, "year": str(date.year), "month": str(date.month), "day": str(date.day), "title":prog})
+            scraperwiki.sqlite.save(unique_keys=['index'], data={"index": index, "year": str(date.year), "month": str(date.month), "day": str(date.day), "link":prog})
 
 def builddates():
     today = datetime.date.today()
@@ -53,8 +53,18 @@ def getpage(date):
     if r.status_code == 200:
         page = r.text
     else:
-        page = "Request error"
+        page = None
     return page
+
+def getURLS(page):
+    soup = BeautifulSoup(page)
+    progdata = soup.find_all("a", class_="promo-link")
+    progs = []
+    for link in progdata:
+        href = link.get('href')
+        progs.append(href)
+    return progs
+
 
 def getProgTitles(page):
     soup = BeautifulSoup(page)
