@@ -41,7 +41,7 @@ def main():
         for prog in progtitles:
             index += 1
             #scraperwiki.sqlite.save(unique_keys=['index'], data={"index": index, "year": str(date.year), "month": str(date.month), "day": str(date.day), "link":prog})
-            scraperwiki.sqlite.save(unique_keys=['index'], data={"index": index, "year": str(date.year), "month": str(date.month), "day": str(date.day), "prog":prog})
+            scraperwiki.sqlite.save(unique_keys=['index'], data={"index": index, "year": str(date.year), "month": str(date.month), "day": str(date.day), "prog":prog['id']})
     scraperwiki.sqlite.save_var('lastindex', index)
 
 def builddates():
@@ -75,13 +75,11 @@ def getURLS(page):
 
 def getProgTitles(page):
     soup = BeautifulSoup(page)
-    progdata = soup.find_all("a", class_="promo-link")
+    progdata = soup.find_all("li", class_="promo")
     progs = []
     for prog in progdata:
-        progsoup = BeautifulSoup(prog.contents[0])
-        progtitle = progsoup.find("p", class_="title")
-        progtitle = unicode(progtitle.string)
-        progs.append(progtitle)
+        p = dict(id=prog['data-wsprogrammeid'])
+        progs.append(p)
     return progs
 
 def savepage(page, date):
