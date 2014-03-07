@@ -21,3 +21,42 @@
 # on Morph for Python (https://github.com/openaustralia/morph-docker-python/blob/master/pip_requirements.txt) and all that matters
 # is that your final data is written to an Sqlite database called data.sqlite in the current working directory which
 # has at least a table called data.
+
+import requests
+import datetime
+
+def main():
+    dates = builddates()
+    for date in dates:
+        page = getpage(date)
+        savepage(page, date)
+
+
+def builddates():
+    today = datetime.date.today()
+    i = datetime.timedelta(days=0)
+    dates = []
+    while i < datetime.timedelta(days=30):
+        i = i + datetime.timedelta(days=1)
+        dates.append(today - i)
+    return dates
+
+def getpage(date):
+    baseurl = 'http://www.channel4.com/programmes/4od/catchup/date/'
+    url = baseurl+str(date.year)+'/'+str(date.month)+'/'+str(date.day)+'/'
+    r = requests.get(url)
+    if r.status_code == 200:
+        page = r.text
+    else:
+        page = "Request error"
+    return page
+
+def savepage(page, date):
+    filename = str(date.year)+'-'+str(date.month)+'-'+str(date.day)+'.html'
+    f = open(filename, 'w')
+    f.write(page)
+    f.close()
+
+if __name__ == '__main__':
+    main()
+
