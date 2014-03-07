@@ -29,13 +29,20 @@ import scraperwiki
 
 def main():
     index = 0
+    scraperwiki.sqlite.execute("drop table if exists swdata")
+    '''if scraperwiki.sqlite.get_var('lastindex') == None:
+        index = 0
+    else:
+        index = scraperwiki.sqlite.get_var('lastindex')'''
     dates = builddates()
     for date in dates:
         page = getpage(date)
-        progtitles = getURLS(page)
+        progtitles = getProgTitles(page)
         for prog in progtitles:
             index += 1
-            scraperwiki.sqlite.save(unique_keys=['index'], data={"index": index, "year": str(date.year), "month": str(date.month), "day": str(date.day), "link":prog})
+            #scraperwiki.sqlite.save(unique_keys=['index'], data={"index": index, "year": str(date.year), "month": str(date.month), "day": str(date.day), "link":prog})
+            scraperwiki.sqlite.save(unique_keys=['index'], data={"index": index, "year": str(date.year), "month": str(date.month), "day": str(date.day), "prog":prog})
+    scraperwiki.sqlite.save_var('lastindex', index)
 
 def builddates():
     today = datetime.date.today()
@@ -71,9 +78,9 @@ def getProgTitles(page):
     progdata = soup.find_all("a", class_="promo-link")
     progs = []
     for prog in progdata:
-        progsoup = BeautifulSoup(prog)
+        progsoup = BeautifulSoup(prog.contents[0])
         progtitles = progsoup.find_all("p", class_="title")
-        progtitle = progtitles[0]
+        progtitle = unicode(progtitles[0].string)
         progs.append(progtitle)
     return progs
 
