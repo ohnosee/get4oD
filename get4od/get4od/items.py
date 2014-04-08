@@ -19,7 +19,6 @@ class Get4OdItem(Item):
     date = Field()
     
 class ProgrammeItem(Item):
-    # define the fields for your item here like:
     wsprogrammeid = Field()
     series_number = Field()
     archiveepisode = Field()

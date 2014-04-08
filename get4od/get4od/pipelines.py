@@ -3,32 +3,18 @@
 # Don't forget to add your pipeline to the ITEM_PIPELINES setting
 # See: http://doc.scrapy.org/en/latest/topics/item-pipeline.html
 
-from scrapy import signals
-from scrapy.contrib.exporter import CsvItemExporter
-
-class Get4OdPipeline(CsvItemExporter(object)):
-
+from sqlalchemy.orm import sessionmaker
+from models import Programme, db_connect, create_prog_table
+ 
+class ProgrammePipeline(object):
     def __init__(self):
-        self.files = {}
-
-    @classmethod
-    def from_crawler(cls, crawler):
-        pipeline = cls()
-        crawler.signals.connect(pipeline.spider_opened, signals.spider_opened)
-        crawler.signals.connect(pipeline.spider_closed, signals.spider_closed)
-        return pipeline
-
-    def spider_opened(self, spider):
-        file = open('%s.csv' % spider.date_string, 'w+b')
-        self.files[spider] = file
-        self.exporter = CsvItemExporter(file)
-        self.exporter.start_exporting()
-
-    def spider_closed(self, spider):
-        self.exporter.finish_exporting()
-        file = self.files.pop(spider)
-        file.close()
-
+        engine = db_connect()
+        create_prog_table(engine)
+        self.Session = sessionmaker(bind=engine)
+ 
     def process_item(self, item, spider):
-        self.exporter.export_item(item)
+        session = self.Session()
+        prog = Programme(**item)
+        session.add(prog)
+        session.commit()
         return item
